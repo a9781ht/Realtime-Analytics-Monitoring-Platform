@@ -1,0 +1,37 @@
+[
+  {
+    "title": "生產線C-爐溫",
+    "value": 74.25,
+    "category": "temperature",
+    "description": "JSON 匯入範例",
+    "recorded_at": "2026-08-07T08:00:00"
+  },
+  {
+    "title": "生產線C-爐溫",
+    "value": 95.10,
+    "category": "temperature",
+    "description": "超過上限閾值",
+    "recorded_at": "2026-08-07T12:00:00"
+  },
+  {
+    "title": "包裝區濕度",
+    "value": 47.83,
+    "category": "humidity",
+    "description": "空調正常",
+    "recorded_at": "2026-08-07T09:30:00"
+  },
+  {
+    "title": "輸送帶振動",
+    "value": 18.42,
+    "category": "vibration",
+    "description": "例行巡檢",
+    "recorded_at": "2026-08-07T10:15:00"
+  },
+  {
+    "title": "廠務用電",
+    "value": 133.60,
+    "category": "power",
+    "description": "尖峰用電",
+    "recorded_at": "2026-08-07T14:00:00"
+  }
+]

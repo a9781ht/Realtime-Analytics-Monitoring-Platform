@@ -1,0 +1,30 @@
+# ---- Web Framework ----
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+websockets==14.1
+
+# ---- 資料驗證 / 設定 ----
+pydantic==2.10.4
+pydantic-settings==2.7.0
+email-validator==2.2.0
+
+# ---- 資料庫 (ORM / 非同步驅動 / 遷移) ----
+SQLAlchemy[asyncio]==2.0.36
+asyncmy==0.2.10
+alembic==1.14.0
+greenlet==3.1.1
+
+# ---- 認證 ----
+PyJWT==2.10.1
+bcrypt==4.2.1
+
+# ---- 資料處理 / 匯出 ----
+pandas==2.2.3
+openpyxl==3.1.5
+
+# ---- 測試 ----
+pytest==8.3.4
+pytest-asyncio==0.25.0
+httpx==0.28.1
+aiosqlite==0.20.0

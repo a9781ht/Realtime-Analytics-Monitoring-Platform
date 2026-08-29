@@ -1,0 +1,49 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ---- 虛擬環境 ----
+.venv/
+venv/
+env/
+
+# ---- 環境變數（切勿提交）----
+.env
+.env.local
+*.env
+!.env.example
+
+# ---- 測試與覆蓋率 ----
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
+# ---- IDE ----
+.idea/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# ---- 日誌與匯出檔 ----
+logs/
+*.log
+exports/
+*.xlsx
+!samples/*.xlsx
+
+# ---- Docker / DB Volume ----
+mariadb_data/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
