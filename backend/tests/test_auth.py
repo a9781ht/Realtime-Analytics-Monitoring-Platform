@@ -46,6 +46,12 @@ async def test_me_with_token(client: AsyncClient, registered_user: dict) -> None
     assert response.json()["username"] == "tester"
 
 
+async def test_logout_revokes_access_token(client: AsyncClient, registered_user: dict) -> None:
+    logout = await client.post("/api/v1/auth/logout", headers=registered_user["headers"])
+    assert logout.status_code == 200
+    assert (await client.get("/api/v1/auth/me", headers=registered_user["headers"])).status_code == 401
+
+
 async def test_duplicate_username_conflict(client: AsyncClient, registered_user: dict) -> None:
     response = await client.post(
         "/api/v1/auth/register",

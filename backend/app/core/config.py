@@ -8,7 +8,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -68,6 +68,19 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_EMAIL: str = "admin@example.com"
     ADMIN_PASSWORD: str = "Admin@1234"
+
+    @model_validator(mode="after")
+    def _validate_production_security(self) -> "Settings":
+        if self.ENVIRONMENT.lower() == "production":
+            unsafe_settings = (
+                self.SECRET_KEY.startswith("please-generate")
+                or self.DB_PASSWORD.endswith("change_me")
+                or self.SEED_DEMO_USERS
+                or self.ADMIN_PASSWORD == "Admin@1234"
+            )
+            if unsafe_settings:
+                raise ValueError("production 環境不可使用展示用密鑰、密碼或示範帳號")
+        return self
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

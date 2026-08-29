@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
 from typing import Any, Literal
 
 import bcrypt
@@ -45,6 +46,7 @@ def create_token(
         "sub": str(subject),
         "role": role,
         "type": token_type,
+        "jti": token_urlsafe(32),
         "iat": now,
         "exp": now + timedelta(minutes=expires_minutes),
     }

@@ -16,6 +16,7 @@ from app.core.security import decode_token
 from app.db.session import get_db
 from app.models.enums import UserRole
 from app.models.user import User
+from app.services import token_service
 from app.services.user_service import get_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login/form")
@@ -33,6 +34,10 @@ async def _resolve_user(token: str, db: AsyncSession) -> User:
 
     if payload.get("type") != "access":
         raise AuthenticationError("Token 類型錯誤，請使用 access token")
+
+    jti = payload.get("jti")
+    if not isinstance(jti, str) or await token_service.is_revoked(db, jti):
+        raise AuthenticationError("認證憑證已失效，請重新登入")
 
     user_id = payload.get("sub")
     if user_id is None:

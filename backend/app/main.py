@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging_config import get_logger, setup_logging
 from app.core.middleware import RequestLogMiddleware
+from app.core.security_middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 from app.db.init_db import create_tables, seed_demo_data
 from app.db.session import engine
 from app.services.generator import generator
@@ -78,9 +79,9 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description=DESCRIPTION,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
+    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
+    redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+    openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
     lifespan=lifespan,
 )
 
@@ -88,11 +89,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     expose_headers=["X-Request-ID", "X-Process-Time-Ms", "Content-Disposition"],
 )
 app.add_middleware(RequestLogMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 register_exception_handlers(app)
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

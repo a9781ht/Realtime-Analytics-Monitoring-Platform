@@ -18,8 +18,6 @@ services:
       - --max-connections=300
     volumes:
       - mariadb_data:/var/lib/mysql
-    ports:
-      - "${DB_PORT:-3306}:3306"
     networks:
       - analytics-net
     healthcheck:

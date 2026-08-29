@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Annotated
 
 import jwt
 from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import CurrentUser, DbSession
@@ -16,9 +18,10 @@ from app.models.enums import UserRole
 from app.schemas.common import Message
 from app.schemas.token import LoginRequest, RefreshRequest, Token
 from app.schemas.user import UserRead, UserRegister
-from app.services import log_service, user_service
+from app.services import log_service, token_service, user_service
 
 router = APIRouter(prefix="/auth", tags=["Auth 認證"])
+logout_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login/form")
 
 
 def _issue_token(user_id: int, role: str) -> Token:
@@ -59,6 +62,13 @@ async def login(payload: LoginRequest, db: DbSession) -> Token:
     await log_service.write_log(
         level="INFO", action="auth.login", message=f"{user.username} 登入成功", user_id=user.id
     )
+    jti = data.get("jti")
+    exp = data.get("exp")
+    if not isinstance(jti, str) or not isinstance(exp, (int, float)):
+        raise AuthenticationError("Refresh Token 格式錯誤")
+    if await token_service.is_revoked(db, jti):
+        raise AuthenticationError("Refresh Token 已失效")
+    await token_service.revoke(db, jti, datetime.fromtimestamp(exp, tz=timezone.utc))
     return _issue_token(user.id, user.role.value)
 
 
@@ -98,8 +108,17 @@ async def read_me(current_user: CurrentUser) -> UserRead:
 
 
 @router.post("/logout", response_model=Message, summary="登出")
-async def logout(current_user: CurrentUser) -> Message:
-    """JWT 為無狀態設計，後端僅記錄事件，實際 Token 由前端清除。"""
+async def logout(
+    current_user: CurrentUser,
+    db: DbSession,
+    token: Annotated[str, Depends(logout_scheme)],
+) -> Message:
+    """撤銷目前 access token，並通知前端清除本機登入狀態。"""
+    payload = decode_token(token)
+    jti = payload.get("jti")
+    exp = payload.get("exp")
+    if isinstance(jti, str) and isinstance(exp, (int, float)):
+        await token_service.revoke(db, jti, datetime.fromtimestamp(exp, tz=timezone.utc))
     await log_service.write_log(
         level="INFO", action="auth.logout", message=f"{current_user.username} 登出",
         user_id=current_user.id,

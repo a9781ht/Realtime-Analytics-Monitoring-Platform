@@ -41,9 +41,9 @@ def _to_read(record: DataRecord) -> DataRecordRead:
 async def list_records(
     db: DbSession,
     _: CurrentUser,
-    page: Annotated[int, Query(ge=1)] = 1,
+    page: Annotated[int, Query(ge=1, le=5000)] = 1,
     size: Annotated[int, Query(ge=1, le=200)] = 20,
-    keyword: Annotated[str | None, Query(description="標題關鍵字")] = None,
+    keyword: Annotated[str | None, Query(max_length=100, description="標題關鍵字")] = None,
     category: str | None = None,
     owner_id: int | None = None,
     min_value: float | None = None,
@@ -178,6 +178,10 @@ async def bulk_import_file(
         raise AppError("檔案過大，請小於 5MB", code="file_too_large")
 
     filename = (file.filename or "").lower()
+    content_type = (file.content_type or "").split(";", 1)[0].lower()
+    allowed_content_types = {"text/csv", "application/json", "application/octet-stream"}
+    if content_type not in allowed_content_types:
+        raise AppError("檔案類型不受支援", code="unsupported_media_type", status_code=415)
     try:
         text = content.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
