@@ -28,6 +28,7 @@ FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH="/app" \
     PATH="/opt/venv/bin:$PATH" \
     TZ=Asia/Taipei
 
