@@ -22,6 +22,7 @@ env/
 
 # ---- 測試與覆蓋率 ----
 .pytest_cache/
+.playwright-mcp/
 .coverage
 htmlcov/
 coverage.xml
