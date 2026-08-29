@@ -24,7 +24,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("jti"),
     )
-    op.create_index("ix_revoked_tokens_jti", "revoked_tokens", ["jti"], unique=True)
     op.create_index("ix_revoked_tokens_expires_at", "revoked_tokens", ["expires_at"])
 
 
