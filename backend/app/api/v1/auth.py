@@ -62,13 +62,6 @@ async def login(payload: LoginRequest, db: DbSession) -> Token:
     await log_service.write_log(
         level="INFO", action="auth.login", message=f"{user.username} 登入成功", user_id=user.id
     )
-    jti = data.get("jti")
-    exp = data.get("exp")
-    if not isinstance(jti, str) or not isinstance(exp, (int, float)):
-        raise AuthenticationError("Refresh Token 格式錯誤")
-    if await token_service.is_revoked(db, jti):
-        raise AuthenticationError("Refresh Token 已失效")
-    await token_service.revoke(db, jti, datetime.fromtimestamp(exp, tz=timezone.utc))
     return _issue_token(user.id, user.role.value)
 
 
@@ -95,6 +88,14 @@ async def refresh_token(payload: RefreshRequest, db: DbSession) -> Token:
 
     if data.get("type") != "refresh":
         raise AuthenticationError("Token 類型錯誤")
+
+    jti = data.get("jti")
+    exp = data.get("exp")
+    if not isinstance(jti, str) or not isinstance(exp, (int, float)):
+        raise AuthenticationError("Refresh Token 格式錯誤")
+    if await token_service.is_revoked(db, jti):
+        raise AuthenticationError("Refresh Token 已失效")
+    await token_service.revoke(db, jti, datetime.fromtimestamp(exp, tz=timezone.utc))
 
     user = await user_service.get_user_by_id(db, int(data["sub"]))
     if user is None or not user.is_active:
