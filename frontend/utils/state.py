@@ -79,7 +79,8 @@ def render_sidebar_user() -> None:
 def guard(require_admin: bool = False) -> None:
     """頁面守衛：未登入導回登入頁，權限不足則中止。"""
     if not is_authenticated():
-        st.switch_page("views/login.py")
+        st.warning("請先登入系統")
+        st.stop()
     if require_admin and not is_admin():
         st.error("權限不足：此頁面僅限系統管理員存取")
         st.stop()
