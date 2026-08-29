@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Annotated
 
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -49,7 +50,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
     # ---- CORS ----
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:8501"]
+    # NoDecode 保留 .env 的逗號分隔字串，交由下方 validator 拆分。
+    # 未指定時 Pydantic Settings 會將 list 環境變數預設當作 JSON 處理。
+    BACKEND_CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:8501"]
 
     # ---- 即時資料產生器 ----
     GENERATOR_ENABLED: bool = True
