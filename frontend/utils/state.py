@@ -26,8 +26,18 @@ def is_authenticated() -> bool:
     return bool(st.session_state.get("access_token") and st.session_state.get("user"))
 
 
+def _store_tokens(tokens: dict) -> None:
+    st.session_state["access_token"] = tokens.get("access_token")
+    st.session_state["refresh_token"] = tokens.get("refresh_token")
+
+
 def get_client() -> APIClient:
-    return APIClient(token=st.session_state.get("access_token"))
+    """建立 API 用戶端；access token 過期時會自動以 refresh token 換發。"""
+    return APIClient(
+        token=st.session_state.get("access_token"),
+        refresh_token=st.session_state.get("refresh_token"),
+        on_token_refresh=_store_tokens,
+    )
 
 
 def current_role() -> str:
@@ -44,10 +54,8 @@ def can_edit() -> bool:
 
 
 def do_login(username: str, password: str) -> None:
-    client = APIClient()
-    tokens = client.login(username, password)
-    st.session_state["access_token"] = tokens["access_token"]
-    st.session_state["refresh_token"] = tokens["refresh_token"]
+    tokens = APIClient().login(username, password)
+    _store_tokens(tokens)
     st.session_state["user"] = APIClient(token=tokens["access_token"]).me()
 
 

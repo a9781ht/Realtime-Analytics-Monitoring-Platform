@@ -14,6 +14,7 @@ class MetricStream:
     """在背景執行緒接收 WebSocket 推送資料，主執行緒定期讀取緩衝區。"""
 
     def __init__(self, url: str, maxlen: int = 900) -> None:
+        # 主執行緒可隨時更新 url（token 換發後），背景執行緒於下次重連時採用
         self.url = url
         self.points: deque[dict] = deque(maxlen=maxlen)
         self.alerts: deque[dict] = deque(maxlen=100)

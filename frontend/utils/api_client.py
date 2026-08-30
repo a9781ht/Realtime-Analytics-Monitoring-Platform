@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from typing import Any
 
 import requests
@@ -23,9 +24,16 @@ class APIError(Exception):
 
 
 class APIClient:
-    def __init__(self, token: str | None = None) -> None:
+    def __init__(
+        self,
+        token: str | None = None,
+        refresh_token: str | None = None,
+        on_token_refresh: Callable[[dict], None] | None = None,
+    ) -> None:
         self.token = token
+        self.refresh_token = refresh_token
         self.base = f"{API_BASE_URL}{API_PREFIX}"
+        self._on_token_refresh = on_token_refresh
 
     # ---------- 內部工具 ----------
     def _headers(self, extra: dict | None = None) -> dict:
@@ -36,15 +44,47 @@ class APIClient:
             headers.update(extra)
         return headers
 
-    def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+    def _try_refresh(self) -> bool:
+        """以 refresh token 換發新的 access token，成功則回傳 True。"""
+        if not self.refresh_token:
+            return False
+        try:
+            response = requests.post(
+                f"{self.base}/auth/refresh",
+                json={"refresh_token": self.refresh_token},
+                timeout=TIMEOUT,
+            )
+        except requests.RequestException:
+            return False
+        if response.status_code >= 400:
+            return False
+        try:
+            tokens = response.json()
+        except ValueError:
+            return False
+
+        self.token = tokens.get("access_token")
+        # 後端換發時會撤銷舊的 refresh token，必須同步更新
+        self.refresh_token = tokens.get("refresh_token")
+        if not self.token:
+            return False
+        if self._on_token_refresh:
+            self._on_token_refresh(tokens)
+        return True
+
+    def _request(self, method: str, path: str, allow_refresh: bool = True, **kwargs: Any) -> Any:
         url = f"{self.base}{path}"
+        timeout = kwargs.pop("timeout", TIMEOUT)
         try:
             response = requests.request(
                 method, url, headers=self._headers(kwargs.pop("headers", None)),
-                timeout=TIMEOUT, **kwargs
+                timeout=timeout, **kwargs
             )
         except requests.RequestException as exc:
             raise APIError(f"無法連線至後端服務：{exc}") from exc
+
+        if response.status_code == 401 and allow_refresh and self._try_refresh():
+            return self._request(method, path, allow_refresh=False, timeout=timeout, **kwargs)
 
         if response.status_code >= 400:
             message = response.text
@@ -75,14 +115,7 @@ class APIClient:
         return self._request("DELETE", path)
 
     def download(self, path: str, params: dict | None = None) -> bytes:
-        url = f"{self.base}{path}"
-        try:
-            response = requests.get(url, headers=self._headers(), params=params, timeout=120)
-        except requests.RequestException as exc:
-            raise APIError(f"下載失敗：{exc}") from exc
-        if response.status_code >= 400:
-            raise APIError("報表下載失敗", response.status_code)
-        return response.content
+        return self._request("GET", path, params=params, timeout=120)
 
     # ---------- 認證 ----------
     def login(self, username: str, password: str) -> dict:
