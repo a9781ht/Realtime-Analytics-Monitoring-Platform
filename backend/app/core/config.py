@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     # 未指定時 Pydantic Settings 會將 list 環境變數預設當作 JSON 處理。
     BACKEND_CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:8501"]
 
+    # ---- 速率限制（單一程序記憶體計數）----
+    RATE_LIMIT_GENERAL: int = 120
+    RATE_LIMIT_LOGIN: int = 5
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+
     # ---- 即時資料產生器 ----
     GENERATOR_ENABLED: bool = True
     GENERATOR_INTERVAL_SECONDS: float = 1.0

@@ -94,7 +94,12 @@ app.add_middleware(
 )
 app.add_middleware(RequestLogMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(RateLimitMiddleware)
+app.add_middleware(
+    RateLimitMiddleware,
+    general_limit=settings.RATE_LIMIT_GENERAL,
+    login_limit=settings.RATE_LIMIT_LOGIN,
+    window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS,
+)
 
 register_exception_handlers(app)
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
