@@ -1,4 +1,4 @@
-# 📈 即時資料分析與監控系統 (Realtime Analytics & Monitoring Platform)
+# 即時資料分析與監控系統 (Realtime Analytics & Monitoring Platform)
 
 一套以 **FastAPI + Streamlit + MariaDB + Docker** 打造的全端即時資料分析與監控系統，
 提供 JWT 認證、角色權限控管、資料 CRUD、CSV/JSON 批量匯入、WebSocket 即時推送、
@@ -15,24 +15,24 @@
 
 ## 目錄
 
-- [專案介紹](#-專案介紹)
-- [功能總覽](#-功能總覽)
-- [技術棧說明](#-技術棧說明)
-- [系統架構圖](#-系統架構圖)
-- [專案結構](#-專案結構)
-- [本地運行步驟](#-本地運行步驟)
-- [Docker 部署指令](#-docker-部署指令)
-- [API 文件連結](#-api-文件連結)
-- [測試帳號資訊](#-測試帳號資訊)
-- [測試資料 CSV 範例](#-測試資料-csv-範例)
-- [環境變數說明](#-環境變數說明)
-- [資料庫遷移 (Alembic)](#-資料庫遷移-alembic)
-- [執行測試](#-執行測試)
-- [常見問題](#-常見問題)
+- [專案介紹](#專案介紹)
+- [功能總覽](#功能總覽)
+- [技術棧說明](#技術棧說明)
+- [系統架構圖](#系統架構圖)
+- [專案結構](#專案結構)
+- [本地運行步驟](#本地運行步驟)
+- [Docker 部署指令](#docker-部署指令)
+- [API 文件連結](#api-文件連結)
+- [測試帳號資訊](#測試帳號資訊)
+- [測試資料 CSV 範例](#測試資料-csv-範例)
+- [環境變數說明](#環境變數說明)
+- [資料庫遷移 (Alembic)](#資料庫遷移-alembic)
+- [執行測試](#執行測試)
+- [常見問題](#常見問題)
 
 ---
 
-## 🎯 專案介紹
+## 專案介紹
 
 本系統模擬工廠 / IoT 場域的「即時資料收集 → 監控告警 → 歷史分析」完整流程：
 
@@ -47,36 +47,36 @@
 
 ---
 
-## ✨ 功能總覽
+## 功能總覽
 
-### 1️⃣ 使用者管理模組
+### 1. 使用者管理模組
 - 使用者註冊（公開註冊固定為 `user` 角色，避免權限提升）
 - JWT 登入（access token + refresh token）、登出、Token 換發
 - 前端於 access token 過期時**自動以 refresh token 換發**並重送請求（含 token 輪替）
 - 三種角色：`admin` / `user` / `viewer`
 - 依角色控管 API 權限（Depends 權限守衛 + 前端 UI 守衛雙層防護）
 
-### 2️⃣ 資料管理模組
+### 2. 資料管理模組
 - 建立資料記錄（標題、數值、分類、說明、時間戳）
 - 查詢資料：**分頁**、關鍵字/分類/數值區間/時間範圍**篩選**、多欄位**排序**
 - 更新 / 刪除資料（僅限**建立者本人或 Admin**）
 - **批量匯入**：JSON API 匯入、CSV / JSON **檔案上傳**匯入（含逐列錯誤回報）
 
-### 3️⃣ 即時監控模組
+### 3. 即時監控模組
 - 模擬即時資料產生器（每秒產生多個感測器隨機資料）
 - WebSocket 即時推送（`/api/v1/realtime/ws?token=...`）
 - 前端即時圖表更新：折線圖、柱狀圖、告警分佈圓餅圖（`st.fragment` 局部刷新）
 - **資料異常告警**：數值超過上/下限時標記 `warning` / `critical` 並列入告警清單
 - 即時資料批次落地至 MariaDB，支援歷史查詢
 
-### 4️⃣ 資料分析模組
+### 4. 資料分析模組
 - 統計分析：總計 / 平均 / 最大 / 最小 / 筆數
 - 時間範圍查詢與時間粒度（hour / day / month）趨勢分析
 - 分類資料聚合（GROUP BY 以 ORM `func` 表達式實作）
 - 趨勢圖表視覺化
 - **Excel 報表下載**（四個工作表：資料明細 / 統計摘要 / 分類聚合 / 趨勢分析）
 
-### 5️⃣ 系統管理模組（Admin 專用）
+### 5. 系統管理模組（Admin 專用）
 - 查看所有使用者列表（分頁、關鍵字、角色、狀態篩選）
 - 使用者權限管理（調整角色、啟用/停用、建立、刪除）
 - 系統日誌查詢（等級、關鍵字、使用者、時間範圍）
@@ -85,7 +85,7 @@
 
 ---
 
-## 🛠 技術棧說明
+## 技術棧說明
 
 ### 後端
 | 技術 | 版本 | 用途 |
@@ -127,17 +127,17 @@
 
 ---
 
-## 🏗 系統架構圖
+## 系統架構圖
 
 > 完整圖表（分層架構、ER 圖、認證時序圖、即時推送流程、權限矩陣、部署拓撲）請見 **[docs/architecture.md](docs/architecture.md)**
 
 ```mermaid
 graph TB
-    subgraph Client["🌐 使用者端"]
+    subgraph Client["使用者端"]
         Browser["瀏覽器"]
     end
 
-    subgraph DockerNet["🐳 Docker Network: analytics-net"]
+    subgraph DockerNet["Docker Network: analytics-net"]
         subgraph FE["Streamlit 前端 :8501"]
             Pages["登入 / 儀表板 / 即時監控<br/>資料管理 / 分析 / 系統管理"]
             WSC["WebSocket Client<br/>背景執行緒"]
@@ -171,7 +171,7 @@ graph TB
 
 ---
 
-## 📁 專案結構
+## 專案結構
 
 ```
 .
@@ -216,7 +216,7 @@ graph TB
 
 ---
 
-## 💻 本地運行步驟
+## 本地運行步驟
 
 ### 前置需求
 - Python 3.12+
@@ -319,7 +319,7 @@ streamlit run app.py
 
 ---
 
-## 🐳 Docker 部署指令
+## Docker 部署指令
 
 ### 一鍵啟動全系統
 
@@ -377,7 +377,7 @@ docker compose stop
 # 移除容器與網路（保留 Volume 資料）
 docker compose down
 
-# ⚠️ 移除容器與所有資料（含資料庫 Volume）
+# 危險：移除容器與所有資料（含資料庫 Volume）
 docker compose down -v
 
 # 查看資源使用
@@ -398,7 +398,7 @@ docker stats analytics-backend analytics-frontend analytics-mariadb
 
 ---
 
-## 📚 API 文件連結
+## API 文件連結
 
 | 文件 | 連結 | 說明 |
 | --- | --- | --- |
@@ -440,17 +440,17 @@ ws.onmessage = (e) => console.log(JSON.parse(e.data));
 
 ---
 
-## 🔑 測試帳號資訊
+## 測試帳號資訊
 
 系統首次啟動時（資料庫為空且 `SEED_DEMO_USERS=true`）會自動建立以下帳號與 40 筆示範資料：
 
 | 角色 | 帳號 | 密碼 | 權限說明 |
 | --- | --- | --- | --- |
-| 👑 **Admin** | `admin` | `Admin@1234` | 全部功能：資料 CRUD（所有人的資料）、使用者管理、系統日誌、資料庫監控 |
-| 👤 **User** | `user` | `User@1234` | 資料 CRUD（僅限自己建立的資料）、批量匯入、分析報表 |
-| 👁️ **Viewer** | `viewer` | `Viewer@1234` | 唯讀：僅可查詢資料、檢視即時監控與分析報表 |
+| **Admin** | `admin` | `Admin@1234` | 全部功能：資料 CRUD（所有人的資料）、使用者管理、系統日誌、資料庫監控 |
+| **User** | `user` | `User@1234` | 資料 CRUD（僅限自己建立的資料）、批量匯入、分析報表 |
+| **Viewer** | `viewer` | `Viewer@1234` | 唯讀：僅可查詢資料、檢視即時監控與分析報表 |
 
-> ⚠️ **安全提醒**：以上為開發/展示用帳號。正式環境請於 `.env` 設定 `SEED_DEMO_USERS=false`，
+> **安全提醒**：以上為開發/展示用帳號。正式環境請於 `.env` 設定 `SEED_DEMO_USERS=false`，
 > 並修改 `ADMIN_PASSWORD` 與 `SECRET_KEY`。
 
 Admin 帳號可透過 `.env` 自訂：
@@ -463,7 +463,7 @@ ADMIN_PASSWORD=Admin@1234
 
 ---
 
-## 📄 測試資料 CSV 範例
+## 測試資料 CSV 範例
 
 範例檔位於 [`samples/sample_records.csv`](samples/sample_records.csv)（25 筆）與
 [`samples/sample_records.json`](samples/sample_records.json)（5 筆）。
@@ -472,11 +472,11 @@ ADMIN_PASSWORD=Admin@1234
 
 | 欄位 | 必填 | 型別 | 說明 |
 | --- | --- | --- | --- |
-| `title` | ✅ | string(200) | 資料標題 |
-| `value` | ✅ | float | 數值 |
-| `category` | ✅ | string(50) | 分類 |
-| `description` | ❌ | string | 說明 |
-| `recorded_at` | ❌ | datetime | 資料時間（`YYYY-MM-DD HH:MM:SS`），留空則為匯入當下時間 |
+| `title` | 是 | string(200) | 資料標題 |
+| `value` | 是 | float | 數值 |
+| `category` | 是 | string(50) | 分類 |
+| `description` | 否 | string | 說明 |
+| `recorded_at` | 否 | datetime | 資料時間（`YYYY-MM-DD HH:MM:SS`），留空則為匯入當下時間 |
 
 ```csv
 title,value,category,description,recorded_at
@@ -507,7 +507,7 @@ curl -X POST http://localhost:8000/api/v1/records/import \
 
 ---
 
-## ⚙️ 環境變數說明
+## 環境變數說明
 
 完整清單請見 [`.env.example`](.env.example)，重點項目：
 
@@ -530,7 +530,7 @@ curl -X POST http://localhost:8000/api/v1/records/import \
 
 ---
 
-## 🗃 資料庫遷移 (Alembic)
+## 資料庫遷移 (Alembic)
 
 ```bash
 cd backend
@@ -565,7 +565,7 @@ alembic downgrade -1
 
 ---
 
-## 🧪 執行測試
+## 執行測試
 
 ```bash
 cd backend
@@ -588,7 +588,7 @@ docker compose exec backend pytest -v
 
 ---
 
-## ❓ 常見問題
+## 常見問題
 
 <details>
 <summary><b>Q1. 啟動時後端一直顯示「資料庫尚未就緒」？</b></summary>
@@ -633,6 +633,6 @@ MariaDB 首次初始化需要 20~40 秒。後端具備自動重試（最多 60 �
 
 ---
 
-## 📜 授權
+## 授權
 
 MIT License

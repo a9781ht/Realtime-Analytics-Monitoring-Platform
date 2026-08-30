@@ -8,11 +8,11 @@
 
 ```mermaid
 graph TB
-    subgraph Client["🌐 使用者端"]
+    subgraph Client["使用者端"]
         Browser["瀏覽器<br/>Chrome / Edge"]
     end
 
-    subgraph DockerNet["🐳 Docker Network: analytics-net"]
+    subgraph DockerNet["Docker Network: analytics-net"]
         subgraph FE["Streamlit 前端容器 :8501"]
             direction TB
             Login["登入 / 註冊頁"]
@@ -208,9 +208,9 @@ sequenceDiagram
 ```mermaid
 graph TD
     subgraph Roles["角色權限"]
-        Admin["👑 admin"]
-        User["👤 user"]
-        Viewer["👁️ viewer"]
+        Admin["admin"]
+        User["user"]
+        Viewer["viewer"]
     end
 
     Admin --> P1["資料 CRUD（全部資料）"]
