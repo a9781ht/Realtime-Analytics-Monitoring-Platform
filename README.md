@@ -52,6 +52,7 @@
 ### 1️⃣ 使用者管理模組
 - 使用者註冊（公開註冊固定為 `user` 角色，避免權限提升）
 - JWT 登入（access token + refresh token）、登出、Token 換發
+- 前端於 access token 過期時**自動以 refresh token 換發**並重送請求（含 token 輪替）
 - 三種角色：`admin` / `user` / `viewer`
 - 依角色控管 API 權限（Depends 權限守衛 + 前端 UI 守衛雙層防護）
 
@@ -190,8 +191,9 @@ graph TB
 │   ├── alembic.ini
 │   ├── alembic/
 │   │   ├── env.py                  # async 遷移環境
-│   │   └── versions/0001_initial_schema.py
-│   ├── tests/                      # pytest 整合測試
+│   │   └── versions/               # 0001 初始結構 / 0002 撤銷 token / 0003 索引清理
+│   ├── tests/                      # pytest 整合測試（auth / records / analytics
+│   │                               #   / realtime / admin / permissions）
 │   └── app/
 │       ├── main.py                 # 應用程式進入點、lifespan
 │       ├── core/                   # 設定、安全、日誌、例外、middleware
@@ -224,8 +226,8 @@ graph TB
 ### 1. 取得專案
 
 ```bash
-git clone https://github.com/<your-account>/realtime-analytics-platform.git
-cd realtime-analytics-platform
+git clone https://github.com/a9781ht/Realtime-Analytics-Monitoring-Platform.git
+cd Realtime-Analytics-Monitoring-Platform
 ```
 
 ### 2. 建立環境變數檔
@@ -422,7 +424,7 @@ docker stats analytics-backend analytics-frontend analytics-mariadb
 | GET | `/api/v1/analytics/trend` | 已登入 | 趨勢分析 |
 | GET | `/api/v1/analytics/export` | 已登入 | 下載 Excel 報表 |
 | WS | `/api/v1/realtime/ws?token=` | 已登入 | WebSocket 即時推送 |
-| GET | `/api/v1/realtime/metrics` | 已登入 | 即時資料歷史查詢 |
+| GET | `/api/v1/realtime/metrics` | admin | 即時資料歷史查詢 |
 | GET | `/api/v1/users` | admin | 使用者列表 |
 | PATCH | `/api/v1/users/{id}/role` | admin | 調整角色 |
 | GET | `/api/v1/admin/logs` | admin | 系統日誌 |
@@ -522,6 +524,8 @@ curl -X POST http://localhost:8000/api/v1/records/import \
 | `GENERATOR_FLUSH_SIZE` | 50 | **條件觸發**批次寫入的緩衝筆數門檻 |
 | `ALERT_THRESHOLD_HIGH` / `LOW` | 90 / 10 | 異常告警上下限 |
 | `BACKEND_CORS_ORIGINS` | http://localhost:8501 | CORS 白名單（逗號分隔） |
+| `RATE_LIMIT_GENERAL` / `LOGIN` | 120 / 5 | 每個時間窗允許的一般請求數 / 登入失敗次數 |
+| `RATE_LIMIT_WINDOW_SECONDS` | 60 | 速率限制時間窗長度（秒） |
 | `API_BASE_URL` / `WS_BASE_URL` | http://backend:8000 | 前端呼叫後端位址 |
 
 ---
@@ -545,7 +549,9 @@ alembic revision --autogenerate -m "add new column"
 alembic downgrade -1
 ```
 
-> 容器啟動時 `entrypoint.sh` 會自動等待資料庫就緒並執行 `alembic upgrade head`。
+> 容器啟動時 `entrypoint.sh` 會自動等待資料庫就緒並執行 `alembic upgrade head`；
+> 遷移失敗會直接中止啟動，避免以不完整的結構繼續執行。
+> **資料表結構一律由 Alembic 管理**，應用程式啟動時不會自動建表。
 
 資料表一覽：
 
@@ -555,6 +561,7 @@ alembic downgrade -1
 | `data_records` | 資料記錄（標題、數值、分類、時間戳、建立者外鍵） |
 | `metric_points` | 即時監控資料（感測器、數值、告警等級、產生時間） |
 | `system_logs` | 系統日誌（等級、動作、路徑、狀態碼、耗時、使用者） |
+| `revoked_tokens` | 已撤銷的 JWT（登出與 refresh 輪替後失效的 token） |
 
 ---
 
@@ -568,13 +575,16 @@ pytest -v
 docker compose exec backend pytest -v
 ```
 
-測試使用 SQLite（aiosqlite）記憶體資料庫，不需連線 MariaDB，涵蓋：
+測試使用 SQLite（aiosqlite）記憶體資料庫，不需連線 MariaDB，共 53 個測試涵蓋：
 
-- 註冊 / 登入 / Token 驗證 / 重複帳號衝突
-- 資料 CRUD 與**跨使用者權限阻擋**（403）
-- 批量匯入
-- 統計分析結果正確性
-- Admin 專用端點的權限守衛
+| 測試檔 | 涵蓋範圍 |
+| --- | --- |
+| `test_auth.py` | 註冊 / 登入 / Token 驗證 / 登出撤銷 / 重複帳號衝突 |
+| `test_records.py` | 資料 CRUD、分頁查詢、**跨使用者權限阻擋**（403）、批量匯入 |
+| `test_analytics.py` | 統計摘要、分類聚合、趨勢（day / month）、時間範圍查詢、Excel 匯出內容 |
+| `test_realtime.py` | 告警閾值判定、資料產生器、WebSocket 連線管理與失效連線清除、WS 認證、歷史查詢權限 |
+| `test_admin.py` | 使用者列表 / 角色調整 / 停用、系統日誌、資料庫狀態監控、非 Admin 阻擋 |
+| `test_permissions.py` | Viewer 唯讀、Admin 跨使用者操作、角色提升防護、Refresh Token 輪替與重放阻擋 |
 
 ---
 
