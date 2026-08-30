@@ -1,4 +1,4 @@
-"""資料庫初始化與示範種子資料。"""
+"""示範種子資料（資料表結構一律由 Alembic 遷移建立）。"""
 
 from __future__ import annotations
 
@@ -10,8 +10,7 @@ from sqlalchemy import func, select
 from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.core.security import hash_password
-from app.db.base import Base
-from app.db.session import AsyncSessionLocal, engine
+from app.db.session import AsyncSessionLocal
 from app.models.enums import UserRole
 from app.models.record import DataRecord
 from app.models.user import User
@@ -25,13 +24,6 @@ DEMO_USERS = [
 ]
 
 DEMO_CATEGORIES = ["temperature", "humidity", "pressure", "vibration", "power"]
-
-
-async def create_tables() -> None:
-    """建立資料表（本機快速啟動用；正式環境請改用 Alembic migration）。"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("資料表檢查/建立完成")
 
 
 async def seed_demo_data() -> None:

@@ -17,7 +17,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging_config import get_logger, setup_logging
 from app.core.middleware import RequestLogMiddleware
 from app.core.security_middleware import RateLimitMiddleware, SecurityHeadersMiddleware
-from app.db.init_db import create_tables, seed_demo_data
+from app.db.init_db import seed_demo_data
 from app.db.session import engine
 from app.services.generator import generator
 
@@ -64,7 +64,6 @@ async def _wait_for_database(retries: int = 30, delay: float = 2.0) -> None:
 async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("啟動 %s v%s（%s）", settings.PROJECT_NAME, settings.VERSION, settings.ENVIRONMENT)
     await _wait_for_database()
-    await create_tables()
     await seed_demo_data()
     await generator.start()
     try:

@@ -21,7 +21,7 @@ else:
 PY
 
 echo "[entrypoint] 執行 Alembic 資料庫遷移..."
-alembic upgrade head || echo "[entrypoint] 遷移失敗，改由應用程式自動建表"
+alembic upgrade head
 
 echo "[entrypoint] 啟動應用程式：$*"
 exec "$@"
