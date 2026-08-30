@@ -218,14 +218,15 @@ graph TD
     Admin --> P3["系統日誌 / 資料庫監控"]
     Admin --> P4["即時資料歷史查詢"]
     Admin --> P5["資料分析與 Excel 下載"]
+    Admin --> P8["即時監控即時檢視（WebSocket）"]
 
     User --> P6["資料 CRUD（僅限自己建立）"]
     User --> P5
-    User --> P4
+    User --> P8
 
     Viewer --> P7["資料唯讀查詢"]
     Viewer --> P5
-    Viewer --> P4
+    Viewer --> P8
 
     style Admin fill:#FFCDD2
     style User fill:#C8E6C9
