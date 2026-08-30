@@ -10,7 +10,7 @@ from utils.api_client import APIError
 from utils.state import get_client, guard, show_error
 
 guard()
-st.title("📊 總覽儀表板")
+st.title("總覽儀表板")
 
 client = get_client()
 
@@ -34,7 +34,7 @@ st.divider()
 left, right = st.columns([3, 2])
 
 with left:
-    st.subheader("📈 每日資料趨勢")
+    st.subheader("每日資料趨勢")
     if trend:
         trend_df = pd.DataFrame(trend)
         fig = px.line(
@@ -47,7 +47,7 @@ with left:
         st.info("目前尚無資料")
 
 with right:
-    st.subheader("🗂️ 分類佔比")
+    st.subheader("分類佔比")
     if categories:
         cat_df = pd.DataFrame(categories)
         fig = px.pie(cat_df, names="category", values="count", hole=0.45)
@@ -57,7 +57,7 @@ with right:
         st.info("目前尚無資料")
 
 st.divider()
-st.subheader("📡 即時監控狀態")
+st.subheader("即時監控狀態")
 
 status_cols = st.columns(4)
 status_cols[0].metric("產生器", "運作中" if realtime_status["running"] else "停止")
@@ -70,7 +70,7 @@ st.caption(
     f"告警閾值：>= {realtime_status['threshold_high']} 或 <= {realtime_status['threshold_low']}"
 )
 
-with st.expander("📋 分類統計明細"):
+with st.expander("分類統計明細"):
     if categories:
         st.dataframe(
             pd.DataFrame(categories).rename(

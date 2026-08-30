@@ -74,7 +74,7 @@ def do_logout() -> None:
 def render_sidebar_user() -> None:
     user = st.session_state.get("user") or {}
     with st.sidebar:
-        st.markdown("### 👤 使用者")
+        st.markdown("### 使用者")
         st.write(f"**{user.get('username', '-')}**")
         st.caption(f"角色：{ROLE_LABELS.get(user.get('role', ''), user.get('role', '-'))}")
         st.caption(f"Email：{user.get('email', '-')}")

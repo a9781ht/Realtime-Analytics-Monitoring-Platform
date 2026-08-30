@@ -11,12 +11,12 @@ from utils.api_client import APIError
 from utils.state import get_client, guard, show_error
 
 guard(require_admin=True)
-st.title("🛡️ 系統管理")
+st.title("系統管理")
 
 client = get_client()
 
 tab_overview, tab_users, tab_logs, tab_db, tab_metrics = st.tabs(
-    ["📊 系統概覽", "👥 使用者管理", "📜 系統日誌", "🗄️ 資料庫狀態", "📡 即時資料歷史"]
+    ["系統概覽", "使用者管理", "系統日誌", "資料庫狀態", "即時資料歷史"]
 )
 
 # ------------------------------------------------------------------ 概覽
@@ -40,7 +40,7 @@ with tab_overview:
         f"緩衝區：{overview['realtime']['buffered']} 筆"
     )
 
-    if st.button("💾 立即批次寫入緩衝資料"):
+    if st.button("立即批次寫入緩衝資料"):
         try:
             result = client.post("/realtime/flush")
             st.success(result["message"])
@@ -93,7 +93,7 @@ with tab_users:
     manage_left, manage_right = st.columns(2)
 
     with manage_left:
-        st.subheader("🔧 調整權限")
+        st.subheader("調整權限")
         with st.form("role_form"):
             target_id = st.number_input("使用者 ID", min_value=1, step=1)
             new_role = st.selectbox("新角色", ["admin", "user", "viewer"])
@@ -112,7 +112,7 @@ with tab_users:
                 show_error(exc)
 
     with manage_right:
-        st.subheader("➕ 建立帳號")
+        st.subheader("建立帳號")
         with st.form("create_user_form"):
             username = st.text_input("帳號")
             email = st.text_input("Email")
@@ -140,7 +140,7 @@ with tab_users:
 
         st.markdown("---")
         delete_id = st.number_input("刪除使用者 ID", min_value=1, step=1, key="del_user")
-        if st.button("🗑️ 刪除使用者"):
+        if st.button("刪除使用者"):
             try:
                 client.delete(f"/users/{int(delete_id)}")
                 st.success("使用者已刪除")
@@ -192,10 +192,10 @@ with tab_db:
     status_cols[1].metric("資料庫方言", db_status["dialect"])
     status_cols[2].metric("伺服器時間", str(db_status["server_time"] or "-"))
 
-    st.subheader("🔗 連接池狀態")
+    st.subheader("連接池狀態")
     st.json(db_status["pool"])
 
-    st.subheader("📦 資料表統計")
+    st.subheader("資料表統計")
     st.dataframe(
         pd.DataFrame(db_status["tables"]).rename(columns={"table": "資料表", "rows": "筆數"}),
         use_container_width=True,
@@ -232,16 +232,16 @@ with tab_metrics:
         st.stop()
 
     if summary_rows:
-        st.subheader("📈 感測器統計")
+        st.subheader("感測器統計")
         st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
 
-    st.subheader("🧾 歷史資料明細")
+    st.subheader("歷史資料明細")
     if metrics["items"]:
         metrics_df = pd.DataFrame(metrics["items"])
         st.caption(f"共 {metrics['meta']['total']:,} 筆，顯示 {len(metrics_df)} 筆")
         st.dataframe(metrics_df, use_container_width=True, hide_index=True)
         st.download_button(
-            "⬇️ 下載 CSV",
+            "下載 CSV",
             data=metrics_df.to_csv(index=False).encode("utf-8-sig"),
             file_name="metric_history.csv",
             mime="text/csv",

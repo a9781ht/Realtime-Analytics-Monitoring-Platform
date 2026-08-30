@@ -7,10 +7,10 @@ import streamlit as st
 from utils.api_client import APIClient, APIError
 from utils.state import do_login
 
-st.title("📈 即時資料分析與監控系統")
+st.title("即時資料分析與監控系統")
 st.caption("FastAPI × Streamlit × MariaDB × Docker")
 
-login_tab, register_tab = st.tabs(["🔐 登入", "📝 註冊"])
+login_tab, register_tab = st.tabs(["登入", "註冊"])
 
 with login_tab:
     with st.form("login_form"):
@@ -29,7 +29,7 @@ with login_tab:
             except APIError as exc:
                 st.error(f"登入失敗：{exc.message}")
 
-    with st.expander("🧪 測試帳號"):
+    with st.expander("測試帳號"):
         st.markdown(
             """
             | 角色 | 帳號 | 密碼 | 權限 |

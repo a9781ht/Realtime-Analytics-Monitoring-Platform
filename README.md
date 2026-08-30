@@ -487,7 +487,7 @@ title,value,category,description,recorded_at
 
 ### 匯入方式
 
-**方式一：前端介面** — 登入後前往「🗂️ 資料管理 → 📥 批量匯入」，上傳檔案後點擊「開始匯入」。
+**方式一：前端介面** — 登入後前往「資料管理 → 批量匯入」，上傳檔案後點擊「開始匯入」。
 
 **方式二：API（curl）**
 
@@ -603,7 +603,7 @@ MariaDB 首次初始化需要 20~40 秒。後端具備自動重試（最多 60 �
 
 1. 確認 `.env` 的 `WS_BASE_URL` 正確（容器內為 `ws://backend:8000`，本機執行為 `ws://localhost:8000`）。
 2. 確認 `GENERATOR_ENABLED=true`。
-3. 點擊頁面上的「▶️ 連線」按鈕重新建立連線。
+3. 點擊頁面上的「連線」按鈕重新建立連線。
 4. 可用 `GET /api/v1/realtime/status` 確認產生器是否運作中。
 </details>
 

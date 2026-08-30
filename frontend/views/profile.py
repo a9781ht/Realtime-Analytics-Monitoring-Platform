@@ -8,7 +8,7 @@ from utils.api_client import APIError
 from utils.state import ROLE_LABELS, get_client, guard, show_error
 
 guard()
-st.title("⚙️ 個人設定")
+st.title("個人設定")
 
 client = get_client()
 user = st.session_state["user"]
@@ -21,7 +21,7 @@ with st.container(border=True):
     cols[3].metric("ID", user["id"])
     st.caption(f"建立時間：{user['created_at']}")
 
-st.subheader("✏️ 更新個人資料")
+st.subheader("更新個人資料")
 with st.form("profile_form"):
     email = st.text_input("Email", value=user.get("email", ""))
     full_name = st.text_input("顯示名稱", value=user.get("full_name") or "")

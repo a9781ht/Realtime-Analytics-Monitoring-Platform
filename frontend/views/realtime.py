@@ -11,7 +11,7 @@ from utils.state import get_client, guard, is_admin, show_error
 from utils.stream import MetricStream
 
 guard()
-st.title("📡 即時監控")
+st.title("即時監控")
 
 client = get_client()
 
@@ -23,13 +23,13 @@ stream: MetricStream = st.session_state["stream"]
 stream.url = client.websocket_url()
 
 control_cols = st.columns([1, 1, 1, 3])
-if control_cols[0].button("▶️ 連線", use_container_width=True):
+if control_cols[0].button("連線", use_container_width=True):
     stream.start()
     st.rerun()
-if control_cols[1].button("⏸️ 中斷", use_container_width=True):
+if control_cols[1].button("中斷", use_container_width=True):
     stream.stop()
     st.rerun()
-if control_cols[2].button("🧹 清除", use_container_width=True):
+if control_cols[2].button("清除", use_container_width=True):
     stream.points.clear()
     stream.alerts.clear()
     st.rerun()
@@ -57,7 +57,7 @@ def render_realtime() -> None:
     points = stream.snapshot()
 
     state_cols = st.columns(4)
-    state_cols[0].metric("連線狀態", "🟢 已連線" if stream.connected else "🔴 未連線")
+    state_cols[0].metric("連線狀態", "已連線" if stream.connected else "未連線")
     state_cols[1].metric("已接收筆數", f"{stream.received:,}")
     state_cols[2].metric("告警次數", len(stream.alert_list()))
     state_cols[3].metric("視窗資料點", len(points))
@@ -112,7 +112,7 @@ def render_realtime() -> None:
     pie_fig.update_layout(height=340, margin=dict(t=50, b=20))
     chart_right.plotly_chart(pie_fig, use_container_width=True)
 
-    st.subheader("🚨 異常告警清單")
+    st.subheader("異常告警清單")
     alerts = stream.alert_list()
     if alerts:
         alert_df = pd.DataFrame(alerts)[
@@ -136,7 +136,7 @@ render_realtime()
 
 if is_admin():
     st.divider()
-    st.subheader("🕘 即時資料歷史查詢")
+    st.subheader("即時資料歷史查詢")
 
     hist_cols = st.columns([1, 1, 1, 1])
     sensor_id = hist_cols[0].text_input("感測器編號", placeholder="SENSOR-01")

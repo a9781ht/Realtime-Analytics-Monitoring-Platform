@@ -16,17 +16,17 @@ st.set_page_config(
 init_state()
 
 if not is_authenticated():
-    pages = [st.Page("views/login.py", title="登入 / 註冊", icon="🔐", default=True)]
+    pages = [st.Page("views/login.py", title="登入 / 註冊", default=True)]
 else:
     render_sidebar_user()
     pages = [
-        st.Page("views/dashboard.py", title="總覽儀表板", icon="📊", default=True),
-        st.Page("views/realtime.py", title="即時監控", icon="📡"),
-        st.Page("views/records.py", title="資料管理", icon="🗂️"),
-        st.Page("views/analytics.py", title="資料分析", icon="📈"),
-        st.Page("views/profile.py", title="個人設定", icon="⚙️"),
+        st.Page("views/dashboard.py", title="總覽儀表板", default=True),
+        st.Page("views/realtime.py", title="即時監控"),
+        st.Page("views/records.py", title="資料管理"),
+        st.Page("views/analytics.py", title="資料分析"),
+        st.Page("views/profile.py", title="個人設定"),
     ]
     if is_admin():
-        pages.append(st.Page("views/admin.py", title="系統管理", icon="🛡️"))
+        pages.append(st.Page("views/admin.py", title="系統管理"))
 
 st.navigation(pages).run()

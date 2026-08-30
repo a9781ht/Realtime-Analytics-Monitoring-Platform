@@ -12,7 +12,7 @@ from utils.api_client import APIError
 from utils.state import get_client, guard, show_error
 
 guard()
-st.title("📈 資料分析")
+st.title("資料分析")
 
 client = get_client()
 
@@ -47,7 +47,7 @@ except APIError as exc:
     show_error(exc)
     st.stop()
 
-st.subheader("📌 統計摘要")
+st.subheader("統計摘要")
 metric_cols = st.columns(5)
 metric_cols[0].metric("筆數", f"{summary['count']:,}")
 metric_cols[1].metric("總計", f"{summary['total'] or 0:,.2f}")
@@ -60,7 +60,7 @@ st.divider()
 chart_left, chart_right = st.columns(2)
 
 with chart_left:
-    st.subheader("📉 趨勢分析")
+    st.subheader("趨勢分析")
     if trend:
         trend_df = pd.DataFrame(trend)
         fig = px.line(
@@ -73,7 +73,7 @@ with chart_left:
         st.info("此區間無資料")
 
 with chart_right:
-    st.subheader("📊 分類聚合")
+    st.subheader("分類聚合")
     if aggregates:
         agg_df = pd.DataFrame(aggregates)
         fig = px.bar(
@@ -86,7 +86,7 @@ with chart_right:
         st.info("此區間無資料")
 
 st.divider()
-st.subheader("📋 分類統計表")
+st.subheader("分類統計表")
 if aggregates:
     st.dataframe(
         pd.DataFrame(aggregates).rename(
@@ -104,7 +104,7 @@ if aggregates:
     )
 
 st.divider()
-st.subheader("⬇️ 下載分析報表")
+st.subheader("下載分析報表")
 st.caption("報表包含四個工作表：資料明細、統計摘要、分類聚合、趨勢分析。")
 
 if st.button("產生 Excel 報表", type="primary"):

@@ -11,7 +11,7 @@ from utils.api_client import APIError
 from utils.state import can_edit, get_client, guard, show_error
 
 guard()
-st.title("🗂️ 資料管理")
+st.title("資料管理")
 
 client = get_client()
 user = st.session_state["user"]
@@ -19,7 +19,7 @@ user = st.session_state["user"]
 if not can_edit():
     st.info("目前身分為唯讀使用者（viewer），僅可瀏覽資料。")
 
-tab_list, tab_create, tab_import = st.tabs(["🔍 資料查詢", "➕ 新增資料", "📥 批量匯入"])
+tab_list, tab_create, tab_import = st.tabs(["資料查詢", "新增資料", "批量匯入"])
 
 # ------------------------------------------------------------------ 查詢
 with tab_list:
@@ -89,7 +89,7 @@ with tab_list:
         st.dataframe(df, use_container_width=True, hide_index=True)
 
         st.download_button(
-            "⬇️ 下載本頁 CSV",
+            "下載本頁 CSV",
             data=df.to_csv(index=False).encode("utf-8-sig"),
             file_name="records.csv",
             mime="text/csv",
@@ -97,7 +97,7 @@ with tab_list:
 
         if can_edit():
             st.divider()
-            st.subheader("✏️ 編輯 / 刪除")
+            st.subheader("編輯 / 刪除")
             edit_cols = st.columns([1, 3])
             record_id = edit_cols[0].number_input("資料 ID", min_value=1, step=1)
 
@@ -129,7 +129,7 @@ with tab_list:
                         except APIError as exc:
                             show_error(exc)
 
-            if st.button("🗑️ 刪除此筆資料", type="secondary"):
+            if st.button("刪除此筆資料", type="secondary"):
                 try:
                     client.delete(f"/records/{int(record_id)}")
                     st.success("刪除成功")
