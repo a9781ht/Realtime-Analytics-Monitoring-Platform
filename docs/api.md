@@ -150,8 +150,8 @@ curl -X GET "http://localhost:8000/api/v1/analytics/export?granularity=day" \
 | WS | `/realtime/ws?token=<access_token>` | 已登入 | 即時資料推送通道 |
 | GET | `/realtime/status` | 已登入 | 產生器狀態、連線數、緩衝筆數 |
 | GET | `/realtime/latest` | 已登入 | 最新一批資料（WebSocket 備援） |
-| GET | `/realtime/metrics` | 已登入 | 即時資料歷史查詢（分頁） |
-| GET | `/realtime/metrics/summary` | 已登入 | 各感測器統計 |
+| GET | `/realtime/metrics` | admin | 即時資料歷史查詢（分頁） |
+| GET | `/realtime/metrics/summary` | admin | 各感測器統計 |
 | POST | `/realtime/flush` | admin | 立即批次寫入緩衝資料 |
 
 ### WebSocket 訊息格式

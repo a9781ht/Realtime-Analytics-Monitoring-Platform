@@ -99,10 +99,14 @@ async def get_latest(_: CurrentUser) -> dict:
     }
 
 
-@router.get("/metrics", response_model=Page[MetricPointRead], summary="即時資料歷史查詢")
+@router.get(
+    "/metrics",
+    response_model=Page[MetricPointRead],
+    summary="即時資料歷史查詢（Admin）",
+    dependencies=[Depends(require_admin)],
+)
 async def list_metrics(
     db: DbSession,
-    _: CurrentUser,
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=500)] = 100,
     sensor_id: str | None = None,
@@ -128,10 +132,13 @@ async def list_metrics(
     )
 
 
-@router.get("/metrics/summary", summary="各感測器統計摘要")
+@router.get(
+    "/metrics/summary",
+    summary="各感測器統計摘要（Admin）",
+    dependencies=[Depends(require_admin)],
+)
 async def metrics_summary(
     db: DbSession,
-    _: CurrentUser,
     start_time: datetime | None = None,
     end_time: datetime | None = None,
 ) -> list[dict]:

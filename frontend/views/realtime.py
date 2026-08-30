@@ -7,7 +7,7 @@ import plotly.express as px
 import streamlit as st
 
 from utils.api_client import APIError
-from utils.state import get_client, guard, show_error
+from utils.state import get_client, guard, is_admin, show_error
 from utils.stream import MetricStream
 
 guard()
@@ -19,6 +19,8 @@ client = get_client()
 if st.session_state.get("stream") is None:
     st.session_state["stream"] = MetricStream(client.websocket_url())
 stream: MetricStream = st.session_state["stream"]
+# Token 可能已換發，重連時需帶上最新的 access token
+stream.url = client.websocket_url()
 
 control_cols = st.columns([1, 1, 1, 3])
 if control_cols[0].button("▶️ 連線", use_container_width=True):
@@ -132,26 +134,27 @@ def render_realtime() -> None:
 
 render_realtime()
 
-st.divider()
-st.subheader("🕘 即時資料歷史查詢")
+if is_admin():
+    st.divider()
+    st.subheader("🕘 即時資料歷史查詢")
 
-hist_cols = st.columns([1, 1, 1, 1])
-sensor_id = hist_cols[0].text_input("感測器編號", placeholder="SENSOR-01")
-only_alert = hist_cols[1].checkbox("僅顯示告警", value=False)
-size = hist_cols[2].number_input("查詢筆數", min_value=10, max_value=500, value=100, step=10)
-query = hist_cols[3].button("查詢", use_container_width=True)
+    hist_cols = st.columns([1, 1, 1, 1])
+    sensor_id = hist_cols[0].text_input("感測器編號", placeholder="SENSOR-01")
+    only_alert = hist_cols[1].checkbox("僅顯示告警", value=False)
+    size = hist_cols[2].number_input("查詢筆數", min_value=10, max_value=500, value=100, step=10)
+    query = hist_cols[3].button("查詢", use_container_width=True)
 
-if query:
-    try:
-        params = {"size": int(size), "only_alert": only_alert}
-        if sensor_id:
-            params["sensor_id"] = sensor_id
-        result = client.get("/realtime/metrics", params)
-        if result["items"]:
-            hist_df = pd.DataFrame(result["items"])
-            st.caption(f"共 {result['meta']['total']:,} 筆，顯示最新 {len(hist_df)} 筆")
-            st.dataframe(hist_df, use_container_width=True, hide_index=True)
-        else:
-            st.info("查無資料")
-    except APIError as exc:
-        show_error(exc)
+    if query:
+        try:
+            params = {"size": int(size), "only_alert": only_alert}
+            if sensor_id:
+                params["sensor_id"] = sensor_id
+            result = client.get("/realtime/metrics", params)
+            if result["items"]:
+                hist_df = pd.DataFrame(result["items"])
+                st.caption(f"共 {result['meta']['total']:,} 筆，顯示最新 {len(hist_df)} 筆")
+                st.dataframe(hist_df, use_container_width=True, hide_index=True)
+            else:
+                st.info("查無資料")
+        except APIError as exc:
+            show_error(exc)
